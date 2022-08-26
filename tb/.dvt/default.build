@@ -1,0 +1,12 @@
+# Automatically identify and compile all the source files in the project directory.
+# DO NOT explicitly list files/directories in 'dvt_auto_init' sections. Use 'dvt_init' sections instead.
++dvt_init
++incdir+../rtl
++incdir+../sim/params_pkgs
+-uvm
+../sim/params_pkgs/params_pkg_id-4_addr-32_data-32_len-8.sv
+../rtl/axi_pkg.sv 
+../rtl/axi_if.sv
+
+../rtl/axi_uvm_pkg.sv 
+../tb/tb.sv
