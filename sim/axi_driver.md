@@ -103,6 +103,9 @@ endcase
 
 #### about calculate axlen
 
+in axi_seq_item, the data type `len` is how many bytes want to transfer, `len` has constraint depend on the burst type, burst size and address.it is not equal to `AXLEN`, to calculate `AXLEN`, follow such steps:
+- calculate unalignment offset: depends on the burst size and address (when burst size is 16 and address is 0xffff_0013, the offset is addr[3:0], is 0x3)
+- if unalignment offset not 0, then the AXLEN should be `int(len / 2**burst_size) + 1` else `int(len / 2**burst_size)`
 
 
 ```verilog
