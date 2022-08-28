@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Thu Aug 25 16:34:41 2022
+# Make data base, printed on Sun Aug 28 18:11:45 2022
 
 # Variables
 
@@ -31,7 +31,7 @@ DVT_HOME = /home/e611hx/dvt_env/dvt_eclipse
 # environment
 LC_NUMERIC = zh_CN.UTF-8
 # environment
-VSCODE_CWD = /home/e611hx/code/self_verification/git_axi_vip/axi-uvm
+VSCODE_CWD = /home/e611hx/code/blog_data
 # environment
 WINDOWPATH = 2
 # environment
@@ -55,7 +55,7 @@ LSCOLORS = Gxfxcxdxbxegedabagacad
 # environment
 XDG_DATA_DIRS = /usr/share/ubuntu-xorg:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop
 # environment
-OLDPWD = /home/e611hx/code/self_verification/git_axi_vip
+OLDPWD = /home/e611hx/code
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
 # automatic
@@ -77,7 +77,7 @@ CURDIR := /home/e611hx/code/self_verification/git_axi_vip/axi-uvm
 # environment
 LM_LICENSE_FILE = /home/e611hx/questasim/license.dat:
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -99,7 +99,7 @@ MAKEFILE_LIST :=
 # environment
 ZSH = /home/e611hx/.oh-my-zsh
 # environment
-VSCODE_PID = 333168
+VSCODE_PID = 551420
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -195,7 +195,7 @@ MANAGERPID = 987
 # environment
 LC_MEASUREMENT = zh_CN.UTF-8
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 331335
+GIO_LAUNCHED_DESKTOP_FILE_PID = 542650
 # environment
 PAGER = less
 # environment
@@ -300,12 +300,12 @@ GNUmakefile:
 #  Failed to be updated.
 
 # files hash-table stats:
- 
 # Load=6/1024=1%, Rehash=0, Collisions=0/15=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
+ 
 # No general ('VPATH' variable) search path.
 
 # strcache buffers: 1 (0) / strings = 20 / storage = 153 B / avg = 7 B
@@ -314,6 +314,6 @@ GNUmakefile:
 # strcache performance: lookups = 23 / hit rate = 13%
 # hash-table stats:
 # Load=20/8192=0%, Rehash=0, Collisions=0/23=0%
-# Finished Make data base on Thu Aug 25 16:34:41 2022
+# Finished Make data base on Sun Aug 28 18:11:45 2022
 
  

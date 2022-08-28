@@ -261,7 +261,7 @@ endfunction : calculate_burst_aligned_address
 /** \brief calculate bus-siz aligned address
  *
  * The AXI function to calculate aligned address is:
- * Aligned_Address = (Address/(2**bus_size)*(2**bus_sze)
+ * Aligned_Address = (Address/(2**bus_size)*(2**bus_size)
  * Zeroing out the bottom burst_size bits does the same thing
  * which is much more eaily synthesizable.
  * @param addr - starting address
