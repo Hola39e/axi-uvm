@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun Aug 28 18:11:45 2022
+# Make data base, printed on Mon Aug 29 16:12:56 2022
 
 # Variables
 
@@ -16,6 +16,8 @@ make: *** No rule to make target 'all'.  Stop.
 GDK_BACKEND = x11
 # environment
 LC_ALL = C
+# environment
+NO_AT_BRIDGE = 1
 # environment
 GNOME_SHELL_SESSION_MODE = ubuntu
 # environment
@@ -31,7 +33,7 @@ DVT_HOME = /home/e611hx/dvt_env/dvt_eclipse
 # environment
 LC_NUMERIC = zh_CN.UTF-8
 # environment
-VSCODE_CWD = /home/e611hx/code/blog_data
+VSCODE_CWD = /home/e611hx/code/self_verification/git_axi_vip/axi-uvm
 # environment
 WINDOWPATH = 2
 # environment
@@ -55,7 +57,7 @@ LSCOLORS = Gxfxcxdxbxegedabagacad
 # environment
 XDG_DATA_DIRS = /usr/share/ubuntu-xorg:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop
 # environment
-OLDPWD = /home/e611hx/code
+OLDPWD = /home/e611hx/code/self_verification/git_axi_vip/axi-uvm/sim
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
 # automatic
@@ -247,7 +249,7 @@ GDMSESSION = ubuntu-xorg
 # environment
 LC_IDENTIFICATION = zh_CN.UTF-8
 # variable set hash-table stats:
-# Load=117/1024=11%, Rehash=0, Collisions=4/144=3%
+# Load=118/1024=12%, Rehash=0, Collisions=4/145=3%
 
 # Pattern-specific Variable Values
 
@@ -300,12 +302,12 @@ GNUmakefile:
 #  Failed to be updated.
 
 # files hash-table stats:
+ 
 # Load=6/1024=1%, Rehash=0, Collisions=0/15=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
- 
 # No general ('VPATH' variable) search path.
 
 # strcache buffers: 1 (0) / strings = 20 / storage = 153 B / avg = 7 B
@@ -314,6 +316,6 @@ GNUmakefile:
 # strcache performance: lookups = 23 / hit rate = 13%
 # hash-table stats:
 # Load=20/8192=0%, Rehash=0, Collisions=0/23=0%
-# Finished Make data base on Sun Aug 28 18:11:45 2022
+# Finished Make data base on Mon Aug 29 16:12:56 2022
 
  

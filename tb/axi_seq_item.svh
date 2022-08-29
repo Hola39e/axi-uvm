@@ -32,7 +32,7 @@
  * \todo: this seq_item is laughably large.  Don't judge me, I've seen your 'temporary' code too. ;)
  */
 class axi_seq_item extends uvm_sequence_item;
-  `uvm_object_utils(axi_seq_item)
+  
 
   //localparam ADDR_WIDTH = 32;
   //localparam ID_WIDTH = 7;
@@ -56,6 +56,7 @@ class axi_seq_item extends uvm_sequence_item;
     rand  bit                                     wstrb [];
     rand  bit                                     wlast [];
   bit                   [LEN_WIDTH-1:0]           axlen;    //used by monitor and coverage
+  `uvm_object_utils(axi_seq_item)
 
    //rand  burst_size_t burst_size; // Burst size
     //rand  burst_type_t burst_type;

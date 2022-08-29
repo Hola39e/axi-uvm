@@ -39,7 +39,12 @@ comp: comp_params_pkg
 pre_release_check: regression
 	echo "Checking logs for UVM errors"
 	grep '\(UVM_ERROR\|UVM_FATAL\)' $(LOG_DIR)/* | grep -v ':    0'; test $$? -eq 1
-	
+
+single_test: comp
+	vsim -voptargs=+acc -c -sv_seed $(SEED) +UVM_TESTNAME=$(UVM_TESTNAME) +transactions=2 tb -do "run -all"
+
+single_test_gui: comp
+	vsim -voptargs=+acc -gui -sv_seed $(SEED) +UVM_TESTNAME=$(UVM_TESTNAME) +transactions=2 tb
 
 
 uvm.lib:

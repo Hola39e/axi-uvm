@@ -33,9 +33,9 @@ package params_pkg;
 
 // The obvious question is what to do with multiple instantiations of
 // different sizes?
-  parameter AXI_ID_WIDTH   = 4;
+  parameter AXI_ID_WIDTH   = 5;
   parameter AXI_ADDR_WIDTH = 32;
-  parameter AXI_DATA_WIDTH = 32;
+  parameter AXI_DATA_WIDTH = 8;
   parameter AXI_LEN_WIDTH  = 8;
 
 

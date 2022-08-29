@@ -75,7 +75,8 @@ typedef enum int {e_WRITE                    = 0, /**< AXI Write - Driver handle
  * \todo: Split driver and responder into different components.
 */
 typedef enum {e_DRIVER,  /**< Agent is a master */
-              e_RESPONDER  /**< Agent is a slave/responder */
+              e_RESPONDER,  /**< Agent is a slave/responder */
+              e_SLAVE
              } driver_type_t;
 
 
@@ -262,6 +263,7 @@ endfunction : ar_to_class
 `include "axi_pipelined_reads_seq.svh"
 
 `include "axi_driver.svh"
+`include "axi_slave_driver.svh"
 `include "axi_responder.svh"
 `include "axi_monitor.svh"
 `include "axi_scoreboard.svh"
