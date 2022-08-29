@@ -241,6 +241,24 @@ interface axi_if #(
   end
 
 
+clocking m_drv_cb @(posedge clk);
+    output iawid, iawaddr, iawlen, iawsize, iawburst,iawvalid, iwdata, iwstrb, iwlast, iwvalid, 
+            ibready, iarid, iaraddr, iarlen, iarsize, iarburst, iarvalid, iarready;
+    input iawready, iwready, ibid, ibresp, ibvalid, iarready, irid, irdata, irresp, irlast, irvalid;
+endclocking
+
+clocking mon_cb @(posedge clk);
+    input iawid, iawaddr, iawlen, iawsize, iawburst,iawvalid, iwdata, iwstrb, iwlast, iwvalid, 
+            ibready, iarid, iaraddr, iarlen, iarsize, iarburst, iarvalid, iarready;
+    input iawready, iwready, ibid, ibresp, ibvalid, iarready, irid, irdata, irresp, irlast, irvalid;
+endclocking
+
+clocking s_drv_cb @(posedge clk);
+    input iawid, iawaddr, iawlen, iawsize, iawburst,iawvalid, iwdata, iwstrb, iwlast, iwvalid, 
+            ibready, iarid, iaraddr, iarlen, iarsize, iarburst, iarvalid, iarready;
+    output iawready, iwready, ibid, ibresp, ibvalid, iarready, irid, irdata, irresp, irlast, irvalid;
+endclocking
+
 
 //  extern task  write(bit [63:0] addr, bit [63:0] data);
 
