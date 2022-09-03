@@ -44,7 +44,7 @@ single_test: comp
 	vsim -voptargs=+acc -c -sv_seed $(SEED) +UVM_TESTNAME=$(UVM_TESTNAME) +transactions=2 tb -do "run -all"
 
 single_test_gui: comp
-	vsim -voptargs=+acc -gui -sv_seed $(SEED) +UVM_TESTNAME=$(UVM_TESTNAME) +transactions=2 tb
+	vsim -voptargs=+acc -gui -sv_seed $(SEED) +UVM_TESTNAME=$(UVM_TESTNAME) +transactions=2 tb -do "add wave -position end sim:/tb/axi_driver_vif/*" -do "run -all"
 
 
 uvm.lib:
