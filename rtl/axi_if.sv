@@ -242,21 +242,25 @@ interface axi_if #(
 
 
 	clocking m_drv_cb @(posedge clk);
+		default input #1ps output #1ps;
 		output iawid, iawaddr, iawlen, iawsize, iawburst,iawvalid, iwdata, iwstrb, iwlast, iwvalid,
-		ibready, iarid, iaraddr, iarlen, iarsize, iarburst, iarvalid, irready;
+		ibready, iarid, iaraddr, iarlen, iarsize, iarburst, iarvalid, irready,iawlock, iawcache, iawprot, iawqos;
 		input iawready, iwready, ibid, ibresp, ibvalid, iarready, irid, irdata, irresp, irlast, irvalid;
 	endclocking
 
 	clocking mon_cb @(posedge clk);
+		default input #1ps output #1ps;
 		input iawid, iawaddr, iawlen, iawsize, iawburst,iawvalid, iwdata, iwstrb, iwlast, iwvalid,
 		ibready, iarid, iaraddr, iarlen, iarsize, iarburst, iarvalid, irready;
 		input iawready, iwready, ibid, ibresp, ibvalid, iarready, irid, irdata, irresp, irlast, irvalid;
 	endclocking
 
 	clocking s_drv_cb @(posedge clk);
+		default input #1ps output #1ps;
 		input iawid, iawaddr, iawlen, iawsize, iawburst,iawvalid, iwdata, iwstrb, iwlast, iwvalid,
-		ibready, iarid, iaraddr, iarlen, iarsize, iarburst, iarvalid, irready;
-		output iawready, iwready, ibid, ibresp, ibvalid, iarready, irid, irdata, irresp, irlast, irvalid;
+		ibready, iarid, iaraddr, iarlen, iarsize, iarburst, iarvalid, irready, iawlock, iawcache
+		, iawprot, iawqos;
+		output ibid, ibresp, ibvalid, iarready, irid, irdata, irresp, irlast,iawready, irvalid;
 	endclocking
 
 
@@ -602,6 +606,7 @@ interface axi_if #(
 		function void read_aw(output axi_seq_item_aw_vector_s s);
 
 			s.awvalid = awvalid;
+			s.awready = awready;
 			s.awid    = awid;
 			s.awaddr  = awaddr;
 			s.awlen   = awlen;

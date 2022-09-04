@@ -97,9 +97,9 @@ task axi_sequential_writes_seq::body;
     start_item(write_item);
 
     `uvm_info(this.get_type_name(),
-              $sformatf("item %0d id:0x%0x addr_lo: 0x%0x  addr_hi: 0x%0x",
-                        xfer_cnt, xid, addr_lo,addr_hi),
-              UVM_HIGH)
+              $sformatf("item %0d id:0x%0x addr_lo: 0x%0x  addr_hi: 0x%0x max_burst_size is %0d",
+                        xfer_cnt, xid, addr_lo,addr_hi, max_burst_size),
+              UVM_INFO)
 
 
     assert( write_item.randomize() with {

@@ -125,19 +125,7 @@ package axi_pkg;
 
 	} axi_seq_item_aw_vector_s;
 
-	function automatic void print_axi_seq_item_write_vector(axi_seq_item_aw_vector_s aws);
-		string s = "";
-		$sformat(s, "%s awid: %0b   \n", s, aws.awid);
-		$sformat(s, "%s awaddr = 0x%0x \n", s, aws.awaddr);
-		$sformat(s, "%s awvalid = %0b \n",   s, aws.awvalid);
-		$sformat(s, "%s awready = %0b \n",   s, aws.awready);
-		$sformat(s, "%s awlen = %0b \n",   s, aws.awlen);
-		$sformat(s, "%s awlock = %0b \n",   s, aws.awlock);
-		$sformat(s, "%s awcache = %0b \n",   s, aws.awcache);
-		$sformat(s, "%s awprot = %0b \n",   s, aws.awprot);
-		$sformat(s, "%s awqos = %0b \n",   s, aws.awqos);
-		`uvm_info("PRINTER", s, UVM_HIGH);
-	endfunction
+
 
 	localparam int AXI_SEQ_ITEM_AW_NUM_BITS = $bits(axi_seq_item_aw_vector_s); /*!< Used to calculate the length of the bit vector
 	 containing the packed write address struct  */

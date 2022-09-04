@@ -81,11 +81,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>DVT Auto-Linked/home/e611hx/code/self_verification/git_axi_vip/axi-uvm/sim</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>DVT Auto-Linked/home/e611hx/dvt_env/dvt_eclipse/predefined_projects/libs/uvm-1.2</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -111,19 +106,9 @@
 			<locationURI>DVT_PATH/home/e611hx/code/self_verification/git_axi_vip/axi-uvm/rtl/axi_uvm_pkg.sv</locationURI>
 		</link>
 		<link>
-			<name>DVT Auto-Linked/home/e611hx/code/self_verification/git_axi_vip/axi-uvm/sim/params_pkgs</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>DVT Auto-Linked/home/e611hx/dvt_env/dvt_eclipse/predefined_projects/libs/uvm-1.2/src</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>DVT Auto-Linked/home/e611hx/code/self_verification/git_axi_vip/axi-uvm/sim/params_pkgs/params_pkg_id-4_addr-32_data-32_len-8.sv</name>
-			<type>1</type>
-			<locationURI>DVT_PATH/home/e611hx/code/self_verification/git_axi_vip/axi-uvm/sim/params_pkgs/params_pkg_id-4_addr-32_data-32_len-8.sv</locationURI>
 		</link>
 		<link>
 			<name>DVT Auto-Linked/home/e611hx/dvt_env/dvt_eclipse/predefined_projects/libs/uvm-1.2/src/base</name>

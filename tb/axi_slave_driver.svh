@@ -21,9 +21,11 @@ class axi_slave_driver extends uvm_driver #(axi_seq_item);
 	extern function void build_phase     (uvm_phase phase);
 	extern function void connect_phase   (uvm_phase phase);
 	extern task          run_phase       (uvm_phase phase);
+	extern function string print_axi_seq_item_write_vector(axi_seq_item_aw_vector_s aws);
+	extern function void read_aw (axi_seq_item_aw_vector_s s);
 
 	extern task          write_address   ();
-//    extern task          write_data      ();
+    extern task          write_data      ();
 //    extern task          write_response  ();
 	extern task          read_address    ();
 //    extern task          read_data       ();
@@ -42,7 +44,7 @@ function void axi_slave_driver::build_phase (uvm_phase phase);
 					.C_AXI_ID_WIDTH(params_pkg::AXI_ID_WIDTH),
 					.C_AXI_LEN_WIDTH(params_pkg::AXI_LEN_WIDTH)))
 			::get(this, "", "vif", axi_vif))begin
-				`uvm_fatal("AXI SLAVE", "CANNOT GET interface")
+		`uvm_fatal("AXI SLAVE", "CANNOT GET interface")
 	end
 	vif = axi_if_abstract::type_id::create("vif", this);
 endfunction : build_phase
@@ -57,7 +59,7 @@ endfunction : connect_phase
 task axi_slave_driver::run_phase(uvm_phase phase);
 	fork
 		write_address();
-		//write_data();
+		write_data();
 		//write_response();
 		read_address();
 	//read_data();
@@ -86,26 +88,51 @@ endtask
 //
 //endtask
 
+function string axi_slave_driver::print_axi_seq_item_write_vector(axi_seq_item_aw_vector_s aws);
+	string str = "";
+	$sformat(str, "%s awid 		= %0b   \n", str, aws.awid);
+	$sformat(str, "%s awaddr 	= 0x%0x \n", str, aws.awaddr);
+	$sformat(str, "%s awvalid 	= %0b \n",   str, aws.awvalid);
+	$sformat(str, "%s awready 	= %0b \n",   str, aws.awready);
+	$sformat(str, "%s awlen 	= %0b \n",   str, aws.awlen);
+	$sformat(str, "%s awlock 	= %0b \n",   str, aws.awlock);
+	$sformat(str, "%s awcache 	= %0b \n",   str, aws.awcache);
+	$sformat(str, "%s awprot 	= %0b \n",   str, aws.awprot);
+	$sformat(str, "%s awqos 	= %0b \n",   str, aws.awqos);
+	return str;
+endfunction
+
 
 task axi_slave_driver::write_address();
 	axi_seq_item_aw_vector_s s;
 	vif.wait_for_not_in_reset();
 
 	forever begin
-		vif.wait_for_clks(.cnt(1));
-		`uvm_info("ID", "MSG", UVM_LOW)
-		wait(axi_vif.awvalid);
+//      vif.wait_for_clks(.cnt(1));
+		@(posedge axi_vif.clk);
+		if(axi_vif.s_drv_cb.iawvalid && axi_vif.iawready)begin
+			assert(axi_vif.s_drv_cb.iawvalid );
+			assert(axi_vif.iawready);
+//          s.awid     = vif.get_awid();
+//          s.awaddr   = vif.get_awaddr();
+//          s.awsize = vif.get_awsize();
+//          s.awburst = vif.get_awburst();
+//          s.awlen  = vif.get_awlen();
 
-		s.awid     = vif.get_awid();
-		s.awaddr   = vif.get_awaddr();
-		s.awsize = vif.get_awsize();
-		s.awburst = vif.get_awburst();
-		s.awlen  = vif.get_awlen();
-		print_axi_seq_item_write_vector(s);
-		`uvm_info("ID", "MSG", UVM_LOW)
-		vif.read_ar(s);
+			vif.read_aw(s);
+			`uvm_info("SLAVE", $sformatf("\n WTRANS %s", print_axi_seq_item_write_vector(s)), UVM_LOW);
+			`uvm_info("SLAVE", $sformatf("\n WTRANS %0b", axi_vif.s_drv_cb.iawvalid), UVM_LOW);
+			writedata_mbx.put(item);
+		end
 	// should push here to support outstanding
 	end
+endtask
+
+task axi_slave_driver::write_data();
+	axi_seq_item item = null;
+	writedata_mbx.get(item);
+	axi_vif.s_drv_cb.iawready <= 1'b0;
+	
 endtask
 
 
@@ -129,3 +156,17 @@ task axi_slave_driver::read_address();
 	end
 
 endtask
+
+function void axi_slave_driver::read_aw (axi_seq_item_aw_vector_s s);
+	s.awvalid = axi_vif.s_drv_cb.iawvalid;
+	s.awready = axi_vif.s_drv_cb.iawready;
+	s.awid    = axi_vif.s_drv_cb.iawid;
+	s.awaddr  = axi_vif.s_drv_cb.iawaddr;
+	s.awlen   = axi_vif.s_drv_cb.iawlen;
+	s.awsize  = axi_vif.s_drv_cb.iawsize;
+	s.awburst = axi_vif.s_drv_cb.iawburst;
+	s.awlock  = axi_vif.s_drv_cb.iawlock;
+	s.awcache = axi_vif.s_drv_cb.iawcache;
+	s.awprot  = axi_vif.s_drv_cb.iawprot;
+	s.awqos   = axi_vif.s_drv_cb.iawqos;
+endfunction

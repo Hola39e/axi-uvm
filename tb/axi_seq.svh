@@ -76,9 +76,13 @@ function axi_seq::new (string name="axi_seq");
     `uvm_fatal(this.get_type_name(),
                "Unable to fetch AXI_DATA_WIDTH from config db.")
   end
-
+  `uvm_info(this.get_type_name(),
+            $sformatf("dwidth is %0d", dwidth),
+            UVM_MEDIUM)
   max_burst_size=$clog2(dwidth/8);
-
+  `uvm_info(this.get_type_name(),
+            $sformatf("dwidth is %0d max burst size is %0d" , dwidth, max_burst_size),
+            UVM_MEDIUM)
 endfunction : new
 
 
