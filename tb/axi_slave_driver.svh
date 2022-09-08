@@ -24,6 +24,7 @@ class axi_slave_driver extends uvm_driver #(axi_seq_item);
 	extern function string print_axi_seq_item_write_vector(axi_seq_item_aw_vector_s aws);
 	extern function void read_aw (axi_seq_item_aw_vector_s s);
 
+	extern task 		wait_for_write_data();
 	extern task          write_address   ();
     extern task          write_data      ();
 //    extern task          write_response  ();
@@ -66,27 +67,6 @@ task axi_slave_driver::run_phase(uvm_phase phase);
 	join_none
 endtask
 
-//task axi_slave_driver::write_address();
-//
-//    axi_seq_item slv_wtrans;
-//    vif.set_awvalid(1'b0);
-//
-//    vif.wait_for_not_in_reset();
-//
-//    forever begin
-//        vif.wait_for_clks(.cnt(1));
-//        wait_for_awvalid();
-//        slv_wtrans.id     = vif.s_drv_cb.iawid;
-//        slv_wtrans.addr   = vif.s_drv_cb.iawaddr;
-//        slv_wtrans.burst_size = vif.s_drv_cb.iawsize;
-//        slv_wtrans.burst_type = B_TYPE'(vif.s_drv_cb.iawburst);
-//        slv_wtrans.axlen  = vif.s_drv_cb.iawlen;
-//
-//        // should push here to support outstanding
-//    end
-//
-//
-//endtask
 
 function string axi_slave_driver::print_axi_seq_item_write_vector(axi_seq_item_aw_vector_s aws);
 	string str = "";
@@ -102,22 +82,21 @@ function string axi_slave_driver::print_axi_seq_item_write_vector(axi_seq_item_a
 	return str;
 endfunction
 
+// ----------------------- task for write adress --------------------------
+//Summary:  wait wirte address to get write transaction, and put 
+// 			item into write data mailbox.
 
+// -------------------------------------------------------------------------
 task axi_slave_driver::write_address();
 	axi_seq_item_aw_vector_s s;
 	vif.wait_for_not_in_reset();
-
+	axi_seq_item_aw_vector_s ws_q[$];
 	forever begin
-//      vif.wait_for_clks(.cnt(1));
+
 		@(posedge axi_vif.clk);
 		if(axi_vif.s_drv_cb.iawvalid && axi_vif.iawready)begin
 			assert(axi_vif.s_drv_cb.iawvalid );
 			assert(axi_vif.iawready);
-//          s.awid     = vif.get_awid();
-//          s.awaddr   = vif.get_awaddr();
-//          s.awsize = vif.get_awsize();
-//          s.awburst = vif.get_awburst();
-//          s.awlen  = vif.get_awlen();
 
 			vif.read_aw(s);
 			`uvm_info("SLAVE", $sformatf("\n WTRANS %s", print_axi_seq_item_write_vector(s)), UVM_LOW);
@@ -128,11 +107,118 @@ task axi_slave_driver::write_address();
 	end
 endtask
 
+// ----------------------- task for write data --------------------------
+//Summary:  read bus and get write data, write into memory
+
+// -------------------------------------------------------------------------
+
 task axi_slave_driver::write_data();
-	axi_seq_item item = null;
-	writedata_mbx.get(item);
-	axi_vif.s_drv_cb.iawready <= 1'b0;
 	
+
+
+	axi_seq_item_w_vector_s s;
+	axi_seq_item_w_vector_s ws_q[$];
+	axi_seq_item item = null;
+	axi_seq_item cloned_item = null;
+	bit [ADDR_WIDTH-1:0] read_addr;
+	int beat_cntr;
+	int beat_cntr_max = 0;
+	int Lower_Byte_Lane, Upper_Byte_Lane;
+	int offset;
+	string msg_s;
+
+	// axi_vif.s_drv_cb.iawready <= 1'b0;
+
+	forever begin
+		`uvm_info(this.get_type_name(), 
+			"======> wait for write data",
+			UVM_LOW)
+		wait_for_write_data(s);
+		`uvm_info(this.get_type_name,
+			"======> wait for write data done",
+			UVM_LOW)
+
+		// push item into queue
+		ws_q.push_back(s);
+
+		if(item == null)begin
+			if(writedata_mbx.num() > 0)begin
+				writedata_mbx.get(item);
+				$cast(cloned_item, item.clone());
+				cloned_item.set_id_info(item);
+
+				cloned_item.cmd = e_WRITE_DATA;
+				cloned_item.data = new[cloned_item.len];
+
+				beat_cntr = 0;
+				beat_cntr_max = axi_pkg::calculate_axlen(
+					cloned_item.addr,
+					cloned_item.burst_size,
+					cloned_item.len
+					) + 1;
+			end
+		end
+
+		if(item != null)begin
+			while (item != null && ws_q.size() > 0)begin
+				s = ws_q.push_front();
+                axi_pkg::get_beat_N_byte_lanes(.addr         (cloned_item.addr),
+                .burst_size   (cloned_item.burst_size),
+                .burst_length (cloned_item.len),
+                .burst_type   (cloned_item.burst_type),
+                .beat_cnt        (beat_cntr),
+                .data_bus_bytes  (vif.get_data_bus_width()/8),
+                .Lower_Byte_Lane  (Lower_Byte_Lane),
+                .Upper_Byte_Lane (Upper_Byte_Lane),
+                .offset          (offset));
+
+                msg_s="";
+				$sformat(msg_s, "%s beat_cntr:%0d",       msg_s, beat_cntr);
+				$sformat(msg_s, "%s beat_cntr_max:%0d",   msg_s, beat_cntr_max);
+				$sformat(msg_s, "%s data_bus_bytes:%0d",  msg_s, vif.get_data_bus_width()/8);
+				$sformat(msg_s, "%s Lower_Byte_Lane:%0d", msg_s, Lower_Byte_Lane);
+				$sformat(msg_s, "%s Upper_Byte_Lane:%0d", msg_s, Upper_Byte_Lane);
+				$sformat(msg_s, "%s offset:%0d",          msg_s, offset);
+
+                msg_s="data: 0x";
+				for (int z=(vif.get_data_bus_width()/8)-1;z>=0;z--) begin
+					$sformat(msg_s, "%s%02x", msg_s, s.rdata[z*8+:8]);
+				end
+
+                for (int z=Lower_Byte_Lane;z<=Upper_Byte_Lane;z++) begin
+					if (offset < cloned_item.len) begin
+						cloned_item.data[offset++] = s.rdata[z*8+:8];
+					end
+				end
+
+                beat_cntr++;
+
+                if(beat_cnt >= beat_cntr_max)begin
+                    //seq_item_port.put(cloned_item)
+                    cloned_item.print();
+                    item = null;
+                    beat_cntr = 0;
+                end
+			end
+
+		end
+	end
+	
+endtask
+
+task axi_slave_driver::wait_for_write_data(output axi_seq_item_w_vector_s s);
+
+	forever begin
+		@(posedge axi_vif.s_drv_cb)begin
+			if(axi_vif.s_drv_cb.iwvalid == 1'b1 && axi_vif.iwready == 1'b1)begin
+			s.wvalid = axi_vif.s_drv_cb.wvalid;
+			s.wdata = axi_vif.s_drv_cb.wdata;
+			s.wstrb = axi_vif.s_drv_cb.wstrb;
+			s.wlast = axi_vif.s_drv_cb.wlast;
+			return;
+			end
+		end
+	end
 endtask
 
 
