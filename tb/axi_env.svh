@@ -143,6 +143,7 @@ function void axi_env::build_phase (uvm_phase phase);
 	uvm_config_db #(memory)::set(null, "*", "m_memory", m_memory);
 	m_axiresponder_agent.m_memory = m_memory;
 	m_axidriver_agent.m_memory    = m_memory;
+    m_axislave_agent.m_memory = m_memory;
 	uvm_config_db #(virtual axi_if #(
 			.C_AXI_ADDR_WIDTH(params_pkg::AXI_ADDR_WIDTH),
 			.C_AXI_DATA_WIDTH(params_pkg::AXI_DATA_WIDTH),

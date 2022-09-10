@@ -41,10 +41,10 @@ pre_release_check: regression
 	grep '\(UVM_ERROR\|UVM_FATAL\)' $(LOG_DIR)/* | grep -v ':    0'; test $$? -eq 1
 
 single_test: comp
-	vsim -voptargs=+acc -c -sv_seed $(SEED) +UVM_TESTNAME=$(UVM_TESTNAME) +transactions=2 tb -do "run -all"
+	vsim -voptargs=+acc -c -sv_seed $(SEED) +UVM_TESTNAME=$(UVM_TESTNAME) +transactions=1 tb -do "run -all"
 
 single_test_gui: comp
-	vsim -voptargs=+acc -gui -sv_seed $(SEED) +UVM_TESTNAME=$(UVM_TESTNAME) +transactions=2 tb -do "add wave -position end sim:/tb/axi_driver_vif/*" -do "run -all"
+	vsim -voptargs=+acc -gui -sv_seed $(SEED) +UVM_TESTNAME=$(UVM_TESTNAME) +transactions=1 tb -do "add wave -position end sim:/tb/axi_driver_vif/*" -do "run -all"
 
 
 uvm.lib:

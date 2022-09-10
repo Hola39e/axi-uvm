@@ -231,7 +231,7 @@ task axi_monitor::write_data();
       $sformat(msg_s, "%s Upper_Byte_Lane:%0d", msg_s, Upper_Byte_Lane);
       $sformat(msg_s, "%s offset:%0d",          msg_s, offset);
 
-      `uvm_info("MONITOR::write_data", msg_s, UVM_HIGH)
+      //`uvm_info("MONITOR::write_data", msg_s, UVM_LOW)
 
       msg_s="wstrb: ";
       for (int x=(vif.get_data_bus_width()/8)-1;x>=0;x--) begin
@@ -256,7 +256,7 @@ task axi_monitor::write_data();
         if (w_s.wstrb[x] == 1'b1) begin
           `uvm_info("M_MEMORY.WRITE",
                     $sformatf("[0x%0x] = 0x%2x", write_addr, w_s.wdata[x*8+:8]),
-                    UVM_HIGH)
+                    UVM_LOW)
           m_memory.write(write_addr, w_s.wdata[x*8+:8]);
         end
 

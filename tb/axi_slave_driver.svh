@@ -22,9 +22,9 @@ class axi_slave_driver extends uvm_driver #(axi_seq_item);
 	extern function void connect_phase   (uvm_phase phase);
 	extern task          run_phase       (uvm_phase phase);
 	extern function string print_axi_seq_item_write_vector(axi_seq_item_aw_vector_s aws);
-	extern function void read_aw (axi_seq_item_aw_vector_s s);
+	extern function void read_aw (output axi_seq_item_aw_vector_s s);
 
-	extern task 		wait_for_write_data();
+	extern task 		wait_for_write_data(output axi_seq_item_w_vector_s s);
 	extern task          write_address   ();
     extern task          write_data      ();
 //    extern task          write_response  ();
@@ -89,20 +89,27 @@ endfunction
 // -------------------------------------------------------------------------
 task axi_slave_driver::write_address();
 	axi_seq_item_aw_vector_s s;
+    axi_seq_item item = new();
+    axi_seq_item_aw_vector_s ws_q[$];
 	vif.wait_for_not_in_reset();
-	axi_seq_item_aw_vector_s ws_q[$];
 	forever begin
 
-		@(posedge axi_vif.clk);
-		if(axi_vif.s_drv_cb.iawvalid && axi_vif.iawready)begin
-			assert(axi_vif.s_drv_cb.iawvalid );
-			assert(axi_vif.iawready);
+		@(posedge axi_vif.s_drv_cb);
+        //`uvm_info("SLAVE", $sformatf("\n iawvalid iawready %0b %0b", axi_vif.s_drv_cb.iawvalid, axi_vif.s_drv_cb.iawready), UVM_LOW);
+		//if(axi_vif.s_drv_cb.iawvalid === 1'b1 && axi_vif.iawready === 1'b1)begin
+        wait(axi_vif.s_drv_cb.iawvalid && axi_vif.s_drv_cb.iawready);
+        //wait(axi_vif.s_drv_cb.iawready);
+            `uvm_info("SLAVE", $sformatf("\n AWVALID %0b", axi_vif.s_drv_cb.iawvalid), UVM_LOW);
+			assert(axi_vif.s_drv_cb.iawvalid); 
+			assert(axi_vif.s_drv_cb.iawready);
 
-			vif.read_aw(s);
+			read_aw(s);
+            
 			`uvm_info("SLAVE", $sformatf("\n WTRANS %s", print_axi_seq_item_write_vector(s)), UVM_LOW);
-			`uvm_info("SLAVE", $sformatf("\n WTRANS %0b", axi_vif.s_drv_cb.iawvalid), UVM_LOW);
+			
+            axi_uvm_pkg::aw_to_class(item, s);
+            item.cmd         = axi_uvm_pkg::e_WRITE;
 			writedata_mbx.put(item);
-		end
 	// should push here to support outstanding
 	end
 endtask
@@ -120,7 +127,7 @@ task axi_slave_driver::write_data();
 	axi_seq_item_w_vector_s ws_q[$];
 	axi_seq_item item = null;
 	axi_seq_item cloned_item = null;
-	bit [ADDR_WIDTH-1:0] read_addr;
+	bit [ADDR_WIDTH-1:0] write_addr;
 	int beat_cntr;
 	int beat_cntr_max = 0;
 	int Lower_Byte_Lane, Upper_Byte_Lane;
@@ -132,11 +139,11 @@ task axi_slave_driver::write_data();
 	forever begin
 		`uvm_info(this.get_type_name(), 
 			"======> wait for write data",
-			UVM_LOW)
+			UVM_HIGH)
 		wait_for_write_data(s);
 		`uvm_info(this.get_type_name,
 			"======> wait for write data done",
-			UVM_LOW)
+			UVM_HIGH)
 
 		// push item into queue
 		ws_q.push_back(s);
@@ -148,78 +155,127 @@ task axi_slave_driver::write_data();
 				cloned_item.set_id_info(item);
 
 				cloned_item.cmd = e_WRITE_DATA;
+                cloned_item.wstrb = new[cloned_item.len];
 				cloned_item.data = new[cloned_item.len];
 
 				beat_cntr = 0;
-				beat_cntr_max = axi_pkg::calculate_axlen(
-					cloned_item.addr,
-					cloned_item.burst_size,
-					cloned_item.len
-					) + 1;
+				// beat_cntr_max = axi_pkg::calculate_axlen(
+				// 	cloned_item.addr,
+				// 	cloned_item.burst_size,
+				// 	cloned_item.len
+				// 	) + 1;
+                // `uvm_info("SLAVE", $sformatf("\n beat cntr is %0d", beat_cntr_max), UVM_LOW);
 			end
 		end
 
 		if(item != null)begin
-			while (item != null && ws_q.size() > 0)begin
-				s = ws_q.push_front();
-                axi_pkg::get_beat_N_byte_lanes(.addr         (cloned_item.addr),
-                .burst_size   (cloned_item.burst_size),
-                .burst_length (cloned_item.len),
-                .burst_type   (cloned_item.burst_type),
-                .beat_cnt        (beat_cntr),
-                .data_bus_bytes  (vif.get_data_bus_width()/8),
-                .Lower_Byte_Lane  (Lower_Byte_Lane),
-                .Upper_Byte_Lane (Upper_Byte_Lane),
-                .offset          (offset));
+			//while (item != null && ws_q.size() > 0)begin
+            while (ws_q.size() > 0)begin
+				s = ws_q.pop_front();
+                axi_pkg::get_beat_N_byte_lanes(.addr         (item.addr),
+                                            .burst_size   (item.burst_size),
+                                            .burst_length (item.len),
+                                            .burst_type   (item.burst_type),
+                                            .beat_cnt        (beat_cntr),
+                                            .data_bus_bytes  (vif.get_data_bus_width()/8),
+                                            .Lower_Byte_Lane  (Lower_Byte_Lane),
+                                            .Upper_Byte_Lane (Upper_Byte_Lane),
+                                            .offset          (offset));
 
                 msg_s="";
 				$sformat(msg_s, "%s beat_cntr:%0d",       msg_s, beat_cntr);
-				$sformat(msg_s, "%s beat_cntr_max:%0d",   msg_s, beat_cntr_max);
 				$sformat(msg_s, "%s data_bus_bytes:%0d",  msg_s, vif.get_data_bus_width()/8);
 				$sformat(msg_s, "%s Lower_Byte_Lane:%0d", msg_s, Lower_Byte_Lane);
 				$sformat(msg_s, "%s Upper_Byte_Lane:%0d", msg_s, Upper_Byte_Lane);
 				$sformat(msg_s, "%s offset:%0d",          msg_s, offset);
+                //`uvm_info("SLV::write_data", msg_s, UVM_LOW)
 
-                msg_s="data: 0x";
-				for (int z=(vif.get_data_bus_width()/8)-1;z>=0;z--) begin
-					$sformat(msg_s, "%s%02x", msg_s, s.rdata[z*8+:8]);
-				end
+                for (int x=Lower_Byte_Lane;x<=Upper_Byte_Lane;x++) begin
+					// if (offset < cloned_item.len) begin
+					// 	cloned_item.data[offset++] = s.wdata[z*8+:8];
+					// end
+                    write_addr=axi_pkg::get_next_address(
+                    .addr(item.addr),
+                    .burst_size(item.burst_size),
+                    .burst_length(item.len),
+                    .burst_type(item.burst_type),
+                    .beat_cnt(beat_cntr),
+                    .lane(x),
+                    .data_bus_bytes(vif.get_data_bus_width()/8));
 
-                for (int z=Lower_Byte_Lane;z<=Upper_Byte_Lane;z++) begin
-					if (offset < cloned_item.len) begin
-						cloned_item.data[offset++] = s.rdata[z*8+:8];
-					end
-				end
+                    if (s.wstrb[x] == 1'b1) begin
+                        `uvm_info("slv M_MEMORY.WRITE",
+                        $sformatf("[0x%0x] = 0x%2x", write_addr, s.wdata[x*8+:8]),
+                        UVM_LOW)
+                        m_memory.write(write_addr, s.wdata[x*8+:8]);
+                    end
+                end
 
                 beat_cntr++;
 
-                if(beat_cnt >= beat_cntr_max)begin
-                    //seq_item_port.put(cloned_item)
-                    cloned_item.print();
-                    item = null;
-                    beat_cntr = 0;
+                // if(beat_cntr >= beat_cntr_max)begin
+                //     //seq_item_port.put(cloned_item);
+                //     cloned_item.print();
+                //     item = null;
+                //     beat_cntr = 0;
+                // end
+                if (s.wlast == 1'b1) begin // @Todo: count, dont rely on wlast?
+
+                    //ap.write(cloned_item);
+                    item=null;
+                    beat_cntr=0;
                 end
 			end
-
 		end
 	end
 	
 endtask
 
+task axi_slave_driver::write_response();
+
+    axi_seq_item_b_vector_s  b_s;
+    axi_seq_item item;
+    axi_seq_item cloned_item;
+
+
+    item = axi_seq_item::type_id::create("item");
+    forever begin
+
+        vif.wait_for_write_response(.s(b_s));
+        `uvm_info(this.get_type_name(), "wait_for_write_response - DONE", UVM_HIGH)
+
+        $cast(cloned_item, item.clone()); // Clone is faster than creating new
+        axi_uvm_pkg::b_to_class(.t(cloned_item), .v(b_s));
+        cloned_item.cmd         = axi_uvm_pkg::e_WRITE_RESPONSE;
+        ap.write(cloned_item);
+
+    end  //forever
+endtask
+
+task axi_slave_driver::wait_for_write_response(output axi_seq_item_b_vector_s s);
+
+        forever begin
+            @(posedge axi_vif.s_drv_cb);
+            wait(axi_vif.s_drv_cb.ibready && axi_vif.s_drv_cb.ibvalid);
+            s.bid   = axi_vif.s_drv_cb.ibid;
+			s.bresp = axi_vif.s_drv_cb.ibresp;
+        end
+endtask
+
 task axi_slave_driver::wait_for_write_data(output axi_seq_item_w_vector_s s);
 
 	forever begin
-		@(posedge axi_vif.s_drv_cb)begin
-			if(axi_vif.s_drv_cb.iwvalid == 1'b1 && axi_vif.iwready == 1'b1)begin
-			s.wvalid = axi_vif.s_drv_cb.wvalid;
-			s.wdata = axi_vif.s_drv_cb.wdata;
-			s.wstrb = axi_vif.s_drv_cb.wstrb;
-			s.wlast = axi_vif.s_drv_cb.wlast;
+		@(posedge axi_vif.s_drv_cb);
+            wait(axi_vif.s_drv_cb.iwready && axi_vif.s_drv_cb.iwvalid);
+			s.wvalid = axi_vif.s_drv_cb.iwvalid;
+			s.wdata = axi_vif.s_drv_cb.iwdata;
+			s.wstrb = axi_vif.s_drv_cb.iwstrb;
+			s.wlast = axi_vif.s_drv_cb.iwlast;
 			return;
-			end
-		end
 	end
 endtask
+
+
 
 
 task axi_slave_driver::read_address();
@@ -243,7 +299,7 @@ task axi_slave_driver::read_address();
 
 endtask
 
-function void axi_slave_driver::read_aw (axi_seq_item_aw_vector_s s);
+function void axi_slave_driver::read_aw (output axi_seq_item_aw_vector_s s);
 	s.awvalid = axi_vif.s_drv_cb.iawvalid;
 	s.awready = axi_vif.s_drv_cb.iawready;
 	s.awid    = axi_vif.s_drv_cb.iawid;

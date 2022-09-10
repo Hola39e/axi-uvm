@@ -244,7 +244,7 @@ interface axi_if #(
 	clocking m_drv_cb @(posedge clk);
 		default input #1ps output #1ps;
 		output iawid, iawaddr, iawlen, iawsize, iawburst,iawvalid, iwdata, iwstrb, iwlast, iwvalid,
-		ibready, iarid, iaraddr, iarlen, iarsize, iarburst, iarvalid, irready,iawlock, iawcache, iawprot, iawqos;
+		ibready, iarid, iaraddr, iarlen, iarsize, iarburst, iarvalid, irready, iawlock, iawcache, iawprot, iawqos;
 		input iawready, iwready, ibid, ibresp, ibvalid, iarready, irid, irdata, irresp, irlast, irvalid;
 	endclocking
 
@@ -259,8 +259,8 @@ interface axi_if #(
 		default input #1ps output #1ps;
 		input iawid, iawaddr, iawlen, iawsize, iawburst,iawvalid, iwdata, iwstrb, iwlast, iwvalid,
 		ibready, iarid, iaraddr, iarlen, iarsize, iarburst, iarvalid, irready, iawlock, iawcache
-		, iawprot, iawqos;
-		output ibid, ibresp, ibvalid, iarready, irid, irdata, irresp, irlast,iawready, irvalid;
+		, iawprot, iawqos, iawready, iwready;
+		output ibid, ibresp, ibvalid, iarready, irid, irdata, irresp, irlast, irvalid;
 	endclocking
 
 
